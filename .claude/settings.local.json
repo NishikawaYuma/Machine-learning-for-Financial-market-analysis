@@ -6,7 +6,24 @@
       "mcp__claude_ai_Notion__notion-search",
       "mcp__claude_ai_Notion__notion-get-users",
       "mcp__claude_ai_Notion__notion-create-pages",
-      "mcp__claude_ai_Notion__notion-create-database"
+      "mcp__claude_ai_Notion__notion-create-database",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(cd \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\"; tree /F 2>$null; if \\($LASTEXITCODE -ne 0\\) { Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -notmatch '\\\\.git' } | ForEach-Object { $_.FullName -replace [regex]::Escape\\($PWD\\), \".\" } })",
+      "Bash(python daily_report.py --dry-run)",
+      "Bash(python3 daily_report.py --dry-run)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(winget *)",
+      "PowerShell(pip install *)",
+      "PowerShell($env:PATH = [System.Environment]::GetEnvironmentVariable\\(\"Path\", \"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\", \"User\"\\); Set-Location \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\"; python daily_report.py --dry-run 2>&1)",
+      "WebFetch(domain:finance.yahoo.co.jp)",
+      "WebSearch",
+      "WebFetch(domain:rss.feedspot.com)",
+      "WebFetch(domain:info.asia.nikkei.com)",
+      "PowerShell($env:PATH = [System.Environment]::GetEnvironmentVariable\\(\"Path\", \"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\", \"User\"\\); [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $env:PYTHONIOENCODING = \"utf-8\"; Set-Location \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\"; python daily_report.py --dry-run 2>&1)",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "Bash(gh run *)"
     ]
   }
 }
