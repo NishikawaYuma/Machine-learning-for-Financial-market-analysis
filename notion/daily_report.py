@@ -3,12 +3,13 @@ from datetime import datetime
 
 import pytz
 
-from .client import get_client, heading, paragraph, divider, bulleted_item, price_table, _fmt_price, _fmt_pct
+from .client import get_client, heading, paragraph, divider, callout, news_item, price_table, volume_table, _fmt_price, _fmt_pct, _fmt_volume
 
 
 def post_daily_report(
     price_data: list[dict],
     news_items: list[dict],
+    volume_rankings: dict | None = None,
     dry_run: bool = False,
 ) -> str | None:
     """
@@ -20,10 +21,10 @@ def post_daily_report(
     title = now_jst.strftime("%Y-%m-%d") + " マーケットレポート"
 
     if dry_run:
-        _print_dry_run(title, price_data, news_items, now_jst)
+        _print_dry_run(title, price_data, news_items, volume_rankings, now_jst)
         return None
 
-    blocks = _build_blocks(price_data, news_items, now_jst)
+    blocks = _build_blocks(price_data, news_items, volume_rankings, now_jst)
     db_id = os.environ.get("NOTION_MARKET_REPORT_DB_ID", "")
     if not db_id:
         raise ValueError(
@@ -71,15 +72,38 @@ def _set_number(props: dict, key: str, val: float | None, scale: float = 1.0) ->
         props[key] = {"number": val * scale}
 
 
-def _build_blocks(price_data: list[dict], news_items: list[dict], now_jst: datetime) -> list:
+def _build_blocks(
+    price_data: list[dict],
+    news_items: list[dict],
+    volume_rankings: dict | None,
+    now_jst: datetime,
+) -> list:
     blocks = [
+        callout(_build_summary_text(price_data), emoji="📊"),
         heading(2, "価格サマリー"),
         price_table(price_data),
         divider(),
-        heading(2, "ニュース"),
     ]
+
+    if volume_rankings:
+        jp = volume_rankings.get("jp", {})
+        us = volume_rankings.get("us", {})
+        if jp.get("items"):
+            blocks += [
+                heading(2, f"日本株 出来高ランキング TOP10（{jp['date']}）"),
+                volume_table(jp["items"], currency="JPY"),
+                divider(),
+            ]
+        if us.get("items"):
+            blocks += [
+                heading(2, f"米国株 出来高ランキング TOP10（{us['date']}）"),
+                volume_table(us["items"], currency="USD"),
+                divider(),
+            ]
+
+    blocks.append(heading(2, "ニュース"))
     for item in news_items:
-        blocks.append(bulleted_item(f"{item['title']}  ({item['source']})"))
+        blocks.append(news_item(item["title"], item["url"], item["source"]))
     blocks += [
         divider(),
         paragraph(
@@ -90,11 +114,27 @@ def _build_blocks(price_data: list[dict], news_items: list[dict], now_jst: datet
     return blocks
 
 
-def _print_dry_run(title: str, price_data: list[dict], news_items: list[dict], now_jst: datetime) -> None:
+def _build_summary_text(price_data: list[dict]) -> str:
+    parts = []
+    for item in price_data:
+        close = _fmt_price(item["close"])
+        pct = _fmt_pct(item["change_pct"])
+        parts.append(f"{item['name']}: {close}  {pct}")
+    return "  |  ".join(parts)
+
+
+def _print_dry_run(
+    title: str,
+    price_data: list[dict],
+    news_items: list[dict],
+    volume_rankings: dict | None,
+    now_jst: datetime,
+) -> None:
     sep = "=" * 50
     print(f"\n{sep}")
     print(f"[DRY RUN] {title}")
     print(sep)
+    print(f"\n[Summary] {_build_summary_text(price_data)}")
 
     print("\n【価格サマリー】")
     header = f"{'銘柄':<10} {'終値':>12} {'前日比':>9} {'週比':>9} {'高値(1M)':>12} {'安値(1M)':>12}"
@@ -110,9 +150,27 @@ def _print_dry_run(title: str, price_data: list[dict], news_items: list[dict], n
             f"{_fmt_price(item['low_1m']):>12}"
         )
 
+    if volume_rankings:
+        for market_key, label, currency in [("jp", "日本株", "JPY"), ("us", "米国株", "USD")]:
+            mkt = volume_rankings.get(market_key, {})
+            if not mkt.get("items"):
+                continue
+            print(f"\n【{label} 出来高ランキング TOP10（{mkt['date']}）】")
+            header = f"{'順位':>4}  {'ティッカー':<10} {'銘柄名':<20} {'終値':>12} {'出来高':>10}"
+            print(header)
+            print("-" * len(header))
+            for i, item in enumerate(mkt["items"], 1):
+                ticker_display = item["ticker"].replace(".T", "")
+                close_str = f"JPY{item['close']:,.0f}" if currency == "JPY" else f"USD{item['close']:,.2f}"
+                print(
+                    f"{i:4}.  {ticker_display:<10} {item['name']:<20} "
+                    f"{close_str:>12} {_fmt_volume(item['volume']):>10}"
+                )
+
     print("\n【ニュース】")
     for i, item in enumerate(news_items, 1):
-        print(f"{i:2}. {item['title']}  ({item['source']})")
+        print(f"{i:2}. {item['title']}")
+        print(f"    ({item['source']})")
         if item["url"]:
             print(f"    {item['url']}")
 
