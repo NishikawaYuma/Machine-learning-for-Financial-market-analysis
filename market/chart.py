@@ -182,14 +182,11 @@ body {
   background: #fff; overflow: hidden; color: #0b2a55;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
-#title {
-  position: fixed; top: 6px; left: 0; right: 0; height: 28px;
-  text-align: center; font-size: 18px; font-weight: 500; z-index: 2;
-}
 #toolbar {
-  position: fixed; top: 34px; left: 0; right: 0; height: 28px;
+  position: fixed; top: 0; left: 0; right: 0; height: 36px;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   z-index: 2; pointer-events: none;
+  background: rgba(255,255,255,0.88);
 }
 .range-btn {
   border: 0; border-radius: 4px; background: #eef0f2; color: #0b2a55;
@@ -198,21 +195,22 @@ body {
 }
 .range-btn.active { background: #dce6f7; }
 #chart {
-  position: fixed; top: 64px; left: 0; right: 0; bottom: 88px;
-  width: 100%; height: calc(100vh - 152px); min-height: 260px;
+  position: fixed; top: 36px; left: 0; right: 0; bottom: 52px;
+  width: 100%; height: calc(100vh - 88px); min-height: 300px;
 }
 #info-panel {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 88px;
+  position: fixed; bottom: 0; left: 0; right: 0; height: 52px;
   background: #f5f7fa; border-top: 1px solid #dde1e7;
   display: flex; align-items: center; justify-content: center; padding: 0 8px;
   overflow: hidden;
 }
 .info-cell {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 0 10px; border-right: 1px solid #dde1e7; flex-shrink: 0;
+  min-width: 0; padding: 0 8px; border-right: 1px solid #dde1e7;
+  flex: 1 1 0;
 }
-.info-label { font-size: 10px; color: #999; margin-bottom: 3px; white-space: nowrap; }
-.info-value { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.info-label { font-size: 10px; color: #999; margin-bottom: 2px; white-space: nowrap; }
+.info-value { font-size: 12px; font-weight: 700; white-space: nowrap; }
 """
 
     return (
@@ -226,7 +224,6 @@ body {
         '<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>\n'
         "</head>\n"
         "<body>\n"
-        f'<div id="title">{title_escaped}</div>\n'
         '<div id="toolbar">\n'
         '  <button class="range-btn" data-range="week">1週間</button>\n'
         '  <button class="range-btn" data-range="month1">1ヶ月</button>\n'
@@ -236,7 +233,7 @@ body {
         "</div>\n"
         '<div id="chart"></div>\n'
         '<div id="info-panel">\n'
-        '  <div class="info-cell" style="border-right:none;min-width:88px;">\n'
+        '  <div class="info-cell" style="min-width:78px;">\n'
         '    <span class="info-label">日付</span>\n'
         '    <span class="info-value" id="i-date" style="font-size:12px;color:#555">---</span>\n'
         "  </div>\n"
