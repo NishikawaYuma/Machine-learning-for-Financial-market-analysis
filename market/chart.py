@@ -442,7 +442,8 @@ def fetch_all_chart_urls() -> dict:
                 raise ValueError("データなし")
             df = _add_moving_averages(df)
             html = _build_chart_html(df, name, info["unit"])
-            filename = f"{info['key']}.html"
+            version = datetime.now().strftime("%Y%m%d%H%M%S")
+            filename = f"{info['key']}_{version}.html"
             url = _upload_html_to_github(html, filename, token, owner, repo)
             result[name] = url
             print(f"  [チャート] {name}: OK")
