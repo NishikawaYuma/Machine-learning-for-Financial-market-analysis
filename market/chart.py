@@ -104,7 +104,7 @@ const chartEl = document.getElementById('chart');
 const chart = echarts.init(chartEl, null, {{renderer: 'canvas'}});
 chart.setOption({{
   animation: false,
-  grid: {{left: 58, right: 18, top: 10, bottom: 28, containLabel: true}},
+  grid: {{left: 58, right: 18, top: 42, bottom: 48, containLabel: true}},
   xAxis: {{
     type: 'category',
     data: dates,
@@ -183,34 +183,35 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 #toolbar {
-  position: fixed; top: 0; left: 0; right: 0; height: 36px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: fixed; top: 6px; left: 0; right: 0; height: 30px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   z-index: 2; pointer-events: none;
-  background: rgba(255,255,255,0.88);
 }
 .range-btn {
   border: 0; border-radius: 4px; background: #eef0f2; color: #0b2a55;
-  font-size: 12px; font-weight: 600; padding: 4px 9px; cursor: pointer;
+  font-size: 11px; font-weight: 600; padding: 4px 8px; cursor: pointer;
   pointer-events: auto;
+  box-shadow: 0 1px 3px rgba(11,42,85,0.12);
 }
 .range-btn.active { background: #dce6f7; }
 #chart {
-  position: fixed; top: 36px; left: 0; right: 0; bottom: 52px;
-  width: 100%; height: calc(100vh - 88px); min-height: 300px;
+  position: fixed; inset: 0;
+  width: 100%; height: 100vh; min-height: 300px;
 }
 #info-panel {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 52px;
-  background: #f5f7fa; border-top: 1px solid #dde1e7;
+  position: fixed; bottom: 6px; left: 8px; right: 8px; height: 38px;
+  background: rgba(245,247,250,0.94); border: 1px solid #dde1e7;
   display: flex; align-items: center; justify-content: center; padding: 0 8px;
   overflow: hidden;
+  z-index: 2;
 }
 .info-cell {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-width: 0; padding: 0 8px; border-right: 1px solid #dde1e7;
+  min-width: 0; padding: 0 6px; border-right: 1px solid #dde1e7;
   flex: 1 1 0;
 }
-.info-label { font-size: 10px; color: #999; margin-bottom: 2px; white-space: nowrap; }
-.info-value { font-size: 12px; font-weight: 700; white-space: nowrap; }
+.info-label { font-size: 9px; color: #999; margin-bottom: 1px; white-space: nowrap; }
+.info-value { font-size: 11px; font-weight: 700; white-space: nowrap; }
 """
 
     return (
