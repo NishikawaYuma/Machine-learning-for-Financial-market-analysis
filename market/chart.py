@@ -77,7 +77,7 @@ def _build_chart_html(df: pd.DataFrame, title: str, unit: str) -> str:
         for _, name, color, width in _MA_STYLES
     ]
 
-    title_escaped = title.replace("<", "&lt;").replace(">", "&gt;")
+    title_escaped = ""
     js = f"""
 const title = {json.dumps(title, ensure_ascii=False)};
 const unit = {json.dumps(unit, ensure_ascii=False)};
