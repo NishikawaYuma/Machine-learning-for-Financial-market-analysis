@@ -3,13 +3,14 @@ from datetime import datetime
 
 import pytz
 
-from .client import get_client, heading, paragraph, divider, callout, news_item, price_table, volume_table, _fmt_price, _fmt_pct, _fmt_volume
+from .client import get_client, heading, paragraph, divider, callout, toggle_item, embed_block, price_table, volume_table, _fmt_price, _fmt_pct, _fmt_volume, _pct_color
 
 
 def post_daily_report(
     price_data: list[dict],
     news_items: list[dict],
     volume_rankings: dict | None = None,
+    chart_urls: dict | None = None,
     dry_run: bool = False,
 ) -> str | None:
     """
@@ -24,7 +25,7 @@ def post_daily_report(
         _print_dry_run(title, price_data, news_items, volume_rankings, now_jst)
         return None
 
-    blocks = _build_blocks(price_data, news_items, volume_rankings, now_jst)
+    blocks = _build_blocks(price_data, news_items, volume_rankings, chart_urls, now_jst)
     db_id = os.environ.get("NOTION_MARKET_REPORT_DB_ID", "")
     if not db_id:
         raise ValueError(
@@ -76,34 +77,38 @@ def _build_blocks(
     price_data: list[dict],
     news_items: list[dict],
     volume_rankings: dict | None,
+    chart_urls: dict | None,
     now_jst: datetime,
 ) -> list:
     blocks = [
-        callout(_build_summary_text(price_data), emoji="📊"),
-        heading(2, "価格サマリー"),
+        callout(_build_summary_rich_text(price_data), emoji="📊"),
+        heading(2, "📈 価格サマリー"),
         price_table(price_data),
         divider(),
     ]
+
+    if chart_urls:
+        blocks += _build_chart_section(chart_urls)
 
     if volume_rankings:
         jp = volume_rankings.get("jp", {})
         us = volume_rankings.get("us", {})
         if jp.get("items"):
             blocks += [
-                heading(2, f"日本株 出来高ランキング TOP10（{jp['date']}）"),
+                heading(2, f"🏆 日本株 出来高ランキング TOP10（{jp['date']}）"),
                 volume_table(jp["items"], currency="JPY"),
                 divider(),
             ]
         if us.get("items"):
             blocks += [
-                heading(2, f"米国株 出来高ランキング TOP10（{us['date']}）"),
+                heading(2, f"🏆 米国株 出来高ランキング TOP10（{us['date']}）"),
                 volume_table(us["items"], currency="USD"),
                 divider(),
             ]
 
-    blocks.append(heading(2, "ニュース"))
+    blocks.append(heading(2, "📰 ニュース"))
     for item in news_items:
-        blocks.append(news_item(item["title"], item["url"], item["source"]))
+        blocks.append(toggle_item(item["title"], item["url"], item["source"]))
     blocks += [
         divider(),
         paragraph(
@@ -114,13 +119,34 @@ def _build_blocks(
     return blocks
 
 
-def _build_summary_text(price_data: list[dict]) -> str:
-    parts = []
-    for item in price_data:
-        close = _fmt_price(item["close"])
-        pct = _fmt_pct(item["change_pct"])
-        parts.append(f"{item['name']}: {close}  {pct}")
-    return "  |  ".join(parts)
+_CHART_TICKER_META = [
+    ("日経225", "📈"),
+    ("VIX",     "🌡️"),
+    ("S&P500",  "📊"),
+]
+
+
+def _build_chart_section(chart_urls: dict) -> list:
+    blocks: list = [heading(2, "📉 チャート")]
+    for name, emoji in _CHART_TICKER_META:
+        url = chart_urls.get(name)
+        blocks.append(heading(3, f"{emoji} {name}"))
+        blocks.append(embed_block(url) if url else paragraph("データ取得に失敗しました"))
+    blocks.append(divider())
+    return blocks
+
+
+def _build_summary_rich_text(price_data: list[dict]) -> list:
+    spans = []
+    for i, item in enumerate(price_data):
+        if i > 0:
+            spans.append({"text": {"content": "  |  "}})
+        spans.append({"text": {"content": f"{item['name']}: {_fmt_price(item['close'])}  "}})
+        spans.append({
+            "text": {"content": _fmt_pct(item["change_pct"])},
+            "annotations": {"color": _pct_color(item["change_pct"])},
+        })
+    return spans
 
 
 def _print_dry_run(
@@ -134,7 +160,10 @@ def _print_dry_run(
     print(f"\n{sep}")
     print(f"[DRY RUN] {title}")
     print(sep)
-    print(f"\n[Summary] {_build_summary_text(price_data)}")
+    summary_parts = []
+    for item in price_data:
+        summary_parts.append(f"{item['name']}: {_fmt_price(item['close'])}  {_fmt_pct(item['change_pct'])}")
+    print(f"\n[Summary] {'  |  '.join(summary_parts)}")
 
     print("\n【価格サマリー】")
     header = f"{'銘柄':<10} {'終値':>12} {'前日比':>9} {'週比':>9} {'高値(1M)':>12} {'安値(1M)':>12}"

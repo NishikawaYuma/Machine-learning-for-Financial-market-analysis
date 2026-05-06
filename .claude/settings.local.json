@@ -25,7 +25,10 @@
       "mcp__claude_ai_Notion__notion-fetch",
       "Bash(gh run *)",
       "PowerShell($python = \"C:\\\\Users\\\\yorim\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; & $python \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\\\\daily_report.py\" --dry-run 2>&1)",
-      "PowerShell($python = \"C:\\\\Users\\\\yorim\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; & $python \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\\\\daily_report.py\" 2>&1)"
+      "PowerShell($python = \"C:\\\\Users\\\\yorim\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\"; & $python \"C:\\\\Users\\\\yorim\\\\Documents\\\\Projects\\\\Machine learning for Financial market analysis\\\\daily_report.py\" 2>&1)",
+      "WebFetch(domain:plotly.com)",
+      "WebFetch(domain:www.chartjs.org)",
+      "WebFetch(domain:altair-viz.github.io)"
     ]
   }
 }

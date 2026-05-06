@@ -39,13 +39,41 @@ def bulleted_item(text: str) -> dict:
     }
 
 
-def callout(text: str, emoji: str = "📊") -> dict:
+def callout(text: str | list, emoji: str = "📊") -> dict:
+    rich_text = text if isinstance(text, list) else [{"text": {"content": text}}]
     return {
         "type": "callout",
         "callout": {
-            "rich_text": [{"text": {"content": text}}],
+            "rich_text": rich_text,
             "icon": {"emoji": emoji},
             "color": "default",
+        },
+        "object": "block",
+    }
+
+
+def toggle_item(title: str, url: str, source: str) -> dict:
+    """ニュース1件: タイトルをトグルブロックにし、ソース名を斜体の子ブロックで表示する。"""
+    text_obj: dict = {"content": title}
+    if url:
+        text_obj["link"] = {"url": url}
+    source_block = {
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [
+                {
+                    "text": {"content": source},
+                    "annotations": {"italic": True, "color": "gray"},
+                }
+            ]
+        },
+        "object": "block",
+    }
+    return {
+        "type": "toggle",
+        "toggle": {
+            "rich_text": [{"text": text_obj}],
+            "children": [source_block],
         },
         "object": "block",
     }
@@ -89,8 +117,8 @@ def price_table(price_data: list[dict]) -> dict:
         _table_row([
             _cell(item["name"]),
             _cell(_fmt_price(item["close"])),
-            _cell(_fmt_pct(item["change_pct"])),
-            _cell(_fmt_pct(item["week_change_pct"])),
+            _colored_cell(_fmt_pct(item["change_pct"]),      _pct_color(item["change_pct"])),
+            _colored_cell(_fmt_pct(item["week_change_pct"]), _pct_color(item["week_change_pct"])),
             _cell(_fmt_price(item["high_1m"])),
             _cell(_fmt_price(item["low_1m"])),
         ])
@@ -115,6 +143,16 @@ def _table_row(cells: list) -> dict:
 
 def _cell(text: str) -> list:
     return [{"text": {"content": text}}]
+
+
+def _colored_cell(text: str, color: str) -> list:
+    return [{"text": {"content": text}, "annotations": {"color": color}}]
+
+
+def _pct_color(val) -> str:
+    if val == "N/A":
+        return "default"
+    return "green" if float(val) >= 0 else "red"
 
 
 def volume_table(items: list[dict], currency: str = "USD") -> dict:
@@ -147,6 +185,33 @@ def volume_table(items: list[dict], currency: str = "USD") -> dict:
             "has_row_header": False,
             "children": [header_row] + data_rows,
         },
+        "object": "block",
+    }
+
+
+def toggle(text: str, children: list) -> dict:
+    return {
+        "type": "toggle",
+        "toggle": {
+            "rich_text": [{"text": {"content": text}}],
+            "children": children,
+        },
+        "object": "block",
+    }
+
+
+def image_block(url: str) -> dict:
+    return {
+        "type": "image",
+        "image": {"type": "external", "external": {"url": url}},
+        "object": "block",
+    }
+
+
+def embed_block(url: str) -> dict:
+    return {
+        "type": "embed",
+        "embed": {"url": url},
         "object": "block",
     }
 

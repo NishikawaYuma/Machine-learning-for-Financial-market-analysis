@@ -26,3 +26,4 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_MARKET_REPORT_DB_ID: ${{ secrets.NOTION_MARKET_REPORT_DB_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

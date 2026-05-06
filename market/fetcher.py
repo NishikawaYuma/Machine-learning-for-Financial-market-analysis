@@ -4,6 +4,7 @@ TICKERS = {
     "日経225": "^N225",
     "S&P500":  "^GSPC",
     "USD/JPY": "USDJPY=X",
+    "VIX":     "^VIX",
 }
 
 

@@ -28,6 +28,7 @@ def main() -> None:
     from market.fetcher import fetch_price_summary
     from market.news import fetch_news
     from market.volume_ranking import fetch_volume_rankings
+    from market.chart import fetch_all_chart_urls
     from notion.daily_report import post_daily_report
 
     print("価格データ取得中...")
@@ -36,9 +37,15 @@ def main() -> None:
     print("ニュース取得中...")
     news_items = fetch_news(max_items=10)
 
+    print("出来高データ取得中...")
     volume_rankings = fetch_volume_rankings()
 
-    post_daily_report(price_data, news_items, volume_rankings, dry_run=args.dry_run)
+    chart_urls = None
+    if not args.dry_run:
+        print("チャートURL生成中...")
+        chart_urls = fetch_all_chart_urls()
+
+    post_daily_report(price_data, news_items, volume_rankings, chart_urls, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
