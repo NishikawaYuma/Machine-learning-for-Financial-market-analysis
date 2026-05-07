@@ -2,9 +2,12 @@ name: 日次マーケットレポート
 
 on:
   schedule:
-    - cron: '0 23 * * 1-5'   # JST 8:00（UTC 23:00 前日）
-    - cron: '0 10 * * 1-5'   # JST 19:00（UTC 10:00）
-  workflow_dispatch:           # GitHub Actions 画面から手動実行可能
+    - cron: "0 23 * * 1-5"  # JST 8:00
+    - cron: "0 10 * * 1-5"  # JST 19:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   report:
@@ -15,8 +18,8 @@ jobs:
       - name: Python セットアップ
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
       - name: 依存ライブラリインストール
         run: pip install -r requirements.txt
@@ -26,4 +29,4 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_MARKET_REPORT_DB_ID: ${{ secrets.NOTION_MARKET_REPORT_DB_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
