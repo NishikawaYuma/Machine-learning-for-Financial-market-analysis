@@ -428,8 +428,11 @@ def _upload_html_to_github(
 
     resp = requests.put(api_url, json=payload, headers=headers)
     resp.raise_for_status()
+    commit_sha = resp.json().get("commit", {}).get("sha", "unknown")
+    pages_url = f"https://{owner}.github.io/{repo}/charts/{filename}"
+    print(f"  [GitHub] コミット: {commit_sha[:7]} | Pages URL: {pages_url}")
     version = datetime.now().strftime("%Y%m%d%H%M%S")
-    return f"https://{owner}.github.io/{repo}/charts/{filename}?v={version}"
+    return f"{pages_url}?v={version}"
 
 
 def fetch_all_chart_urls() -> dict:
@@ -446,7 +449,7 @@ def fetch_all_chart_urls() -> dict:
             filename = f"{info['key']}_{version}.html"
             url = _upload_html_to_github(html, filename, token, owner, repo)
             result[name] = url
-            print(f"  [チャート] {name}: OK")
+            print(f"  [チャート] {name}: アップロードOK → {url}")
         except Exception as e:
             print(f"  [WARN] チャートURL生成失敗: {name}: {e}")
             result[name] = None

@@ -45,7 +45,15 @@ def main() -> None:
         print("チャートURL生成中...")
         chart_urls = fetch_all_chart_urls()
 
-    post_daily_report(price_data, news_items, volume_rankings, chart_urls, dry_run=args.dry_run)
+    notion_url = post_daily_report(price_data, news_items, volume_rankings, chart_urls, dry_run=args.dry_run)
+
+    if notion_url:
+        print("\n=== 投稿サマリー ===")
+        print(f"Notion ページ: {notion_url}")
+        if chart_urls:
+            print("チャートURL:")
+            for name, url in chart_urls.items():
+                print(f"  {name}: {url if url else '取得失敗'}")
 
 
 if __name__ == "__main__":
