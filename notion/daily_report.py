@@ -131,7 +131,8 @@ def _build_chart_section(chart_urls: dict) -> list:
     for name, emoji in _CHART_TICKER_META:
         url = chart_urls.get(name)
         blocks.append(heading(3, f"{emoji} {name}"))
-        blocks.append(embed_block(url) if url else paragraph("データ取得に失敗しました"))
+        clean_url = url.split("?")[0] if url else None
+        blocks.append(embed_block(clean_url) if clean_url else paragraph("データ取得に失敗しました"))
     blocks.append(divider())
     return blocks
 

@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import time
 from datetime import datetime
 
 import pandas as pd
@@ -435,9 +436,26 @@ def _upload_html_to_github(
     return f"{pages_url}?v={version}"
 
 
+def _wait_for_pages_url(url: str, timeout: int = 180, interval: int = 15) -> bool:
+    """GitHub Pages のデプロイ完了まで待機する。タイムアウト時は False を返す。"""
+    base_url = url.split("?")[0]
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            resp = requests.get(base_url, timeout=10, allow_redirects=True)
+            if resp.status_code == 200:
+                return True
+        except Exception:
+            pass
+        time.sleep(interval)
+    return False
+
+
 def fetch_all_chart_urls() -> dict:
     result = {}
     token, owner, repo = _github_config()
+    uploaded: list[tuple[str, str]] = []
+
     for name, info in CHART_TICKERS.items():
         try:
             df = fetch_ohlcv(info["symbol"])
@@ -448,9 +466,20 @@ def fetch_all_chart_urls() -> dict:
             version = datetime.now().strftime("%Y%m%d%H%M%S")
             filename = f"{info['key']}_{version}.html"
             url = _upload_html_to_github(html, filename, token, owner, repo)
-            result[name] = url
-            print(f"  [チャート] {name}: アップロードOK → {url}")
+            uploaded.append((name, url))
         except Exception as e:
             print(f"  [WARN] チャートURL生成失敗: {name}: {e}")
             result[name] = None
+
+    if uploaded:
+        print("  [Pages] GitHub Pages のデプロイ待機中...")
+        first_url = uploaded[0][1]
+        ready = _wait_for_pages_url(first_url)
+        if not ready:
+            print("  [WARN] Pages デプロイのタイムアウト。URL が有効にならない可能性があります。")
+
+    for name, url in uploaded:
+        result[name] = url
+        print(f"  [チャート] {name}: アップロードOK → {url}")
+
     return result

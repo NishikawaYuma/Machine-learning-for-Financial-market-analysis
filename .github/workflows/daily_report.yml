@@ -2,7 +2,7 @@ name: 日次マーケットレポート
 
 on:
   schedule:
-    - cron: "0 23 * * 1-5"  # JST 8:00
+    - cron: "0 23 * * 0-4"  # JST 8:00 (UTC Sun–Thu)
     - cron: "0 10 * * 1-5"  # JST 19:00
   workflow_dispatch:
 
